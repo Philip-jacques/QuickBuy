@@ -11,7 +11,7 @@ $errorMessage = "";
 
 // Check if the form has been submitted using the POST method.
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-   
+
     include 'db.php';
 
     // Sanitize and retrieve form data from the POST request.
@@ -23,17 +23,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Check if the terms checkbox was checked.
     $terms = isset($_POST["terms"]);
 
-    // Retrieve phone number, default to empty string if not provided.
-    $phone = htmlspecialchars($_POST["phone"] ?? '');
+    // Retrieve phone number, and it must now be provided.
+    $phone = htmlspecialchars($_POST["phone"] ?? ''); // Keep htmlspecialchars for safety, but validation handles emptiness
 
     // Validate if terms and conditions are accepted.
     if (!$terms) {
         $errorMessage = "Please accept the terms and conditions.";
-    } 
+    }
+    // ADDED: Validate if phone number is empty
+    elseif (empty($phone)) {
+        $errorMessage = "Phone number is required.";
+    }
     // Validate if passwords match.
     elseif ($password !== $confirmPassword) {
         $errorMessage = "Passwords do not match.";
-    } 
+    }
     // If initial validations pass, proceed with password strength and database insertion.
     else {
         // Validate password strength: at least 8 characters, one uppercase, one number, one special character.
@@ -42,7 +46,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             !preg_match("/[0-9]/", $password) ||
             !preg_match("/[^a-zA-Z0-9]/", $password)) {
             $errorMessage = "Password does not meet strength requirements (min 8 chars, 1 uppercase, 1 number, 1 special).";
-        } 
+        }
         // If password meets strength requirements, proceed with registration.
         else {
             // Hash the password for secure storage.
@@ -68,11 +72,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 }
             }
             // Close the prepared statement.
-            $stmt->close(); 
+            $stmt->close();
         }
     }
     // Close the database connection.
-    $conn->close(); 
+    $conn->close();
 }
 ?>
 
@@ -583,12 +587,12 @@ html, body {
             background-color: var(--caribbean-current);
         }
 
-        
+
         .register-back-container {
             margin-top: 25px;
             text-align: center;
         }
-        
+
 
         /* Animations */
         @keyframes fadeIn {
@@ -724,7 +728,7 @@ html, body {
             .terms-modal-content button {
                 padding: 8px 20px;
             }
-            .back-button { 
+            .back-button {
                 padding: 8px 20px;
                 font-size: 1em;
             }
@@ -791,7 +795,7 @@ html, body {
             .terms-modal-content button {
                 padding: 8px 20px;
             }
-            .back-button { 
+            .back-button {
                 font-size: 0.85em;
                 padding: 7px 18px;
             }
@@ -804,7 +808,6 @@ html, body {
             }
         }
     </style>
-<!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-M37ZFNLZ9Q"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -818,13 +821,13 @@ html, body {
 <div class="register-container">
     <h2>Create Your Account</h2>
 
-    <?php 
+    <?php
     // Display error message if it's not empty.
     if (!empty($errorMessage)): ?>
         <div class="message"><?php echo $errorMessage; ?></div>
     <?php endif; ?>
 
-    <?php 
+    <?php
     // Display success message if it's not empty.
     if (!empty($successMessage)): ?>
         <div class="message success"><?php echo $successMessage; ?></div>
@@ -848,8 +851,8 @@ html, body {
             <input type="password" name="confirm_password" id="confirm_password" placeholder="Confirm Password" required oninput="validateForm()">
             <span class="toggle-password" onclick="togglePassword('confirm_password')">👁️</span>
         </div>
-        <input type="text" name="phone" id="phone" placeholder="Phone (Optional)">
-        
+        <input type="text" name="phone" id="phone" placeholder="Phone Number" required oninput="validateForm()">
+
         <div class="select-wrapper">
             <select name="role" id="role" required onchange="validateForm()">
                 <option value="">Select Role</option>
@@ -903,100 +906,86 @@ html, body {
             <ul>
                 <li>Once an order is placed and confirmed, it is considered final.</li>
                 <li><strong>Buyers are solely responsible for ensuring that they have selected the correct items they wish to purchase before completing their order.</strong> We strongly advise you to carefully review your cart contents, quantities, and selected variations before proceeding to checkout.</li>
-                <li><strong>All sales are final, and we do not offer refunds or exchanges on items once an order has been placed.</strong> This policy is in place to ensure efficient processing and management of inventory and transactions on the platform.</li>
+                <li><strong>All sales are final, and we do not offer refunds or exchanges on items once an order has been placed.</strong> This policy is in place to ensure efficient processing and to reflect the nature of our marketplace.</li>
             </ul>
-
-            <h4>5. Privacy Policy Summary</h4>
-            <ul>
-                <li>Your privacy is important to us. When you register and place an order, we collect personal information such as your name, email address, shipping address, and payment details. This information is used solely for the purpose of processing your orders, providing customer support, and improving your shopping experience. We do not sell or share your personal information with third parties for their marketing purposes. For a comprehensive understanding of how we collect, use, and protect your data, please refer to our full Privacy Policy available at <a href="private.policy.php" target="_blank" style="color: var(--white-pop); text-decoration: underline;">Privacy Policy Page</a>.</li>
-            </ul>
-
-            <h4>6. Disclaimer of Responsibility</h4>
-            <ul>
-                <li>We are not responsible for any transactions or interactions that occur directly between buyers and sellers on the platform. All such interactions and the condition of goods received are at your own risk.</li>
-            </ul>
-
-            <p>Please read these terms carefully before registering and using our platform. By clicking "Register" and ticking the "Terms and Conditions" checkbox, you signify your understanding and acceptance of these terms.</p>
-        </div>
-        <div style="text-align: right;">
-            <button onclick="closeTermsModal()">Close</button>
         </div>
     </div>
 </div>
 
 <script>
-    /**
-     * Toggles the visibility of a password input field.
-     * @param {string} id The ID of the password input field.
-     */
+    // Function to toggle password visibility
     function togglePassword(id) {
         const input = document.getElementById(id);
-        input.type = input.type === "password" ? "text" : "password";
+        const icon = input.nextElementSibling; // Get the next sibling (the eye icon)
+
+        if (input.type === "password") {
+            input.type = "text";
+            icon.textContent = '🙈'; // Change to a "hide" icon
+        } else {
+            input.type = "password";
+            icon.textContent = '👁️'; // Change to a "show" icon
+        }
     }
 
-    /**
-     * Handles password input changes. Shows/hides the confirm password field
-     * based on password strength.
-     */
-    function handlePasswordInput() {
-        const password = document.getElementById("password").value;
-        const confirmContainer = document.getElementById("confirmContainer");
-        // Regex for strong password: at least 8 characters, one uppercase, one number, one special character.
-        const strongPasswordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
-
-        // Display confirm password field only if password meets strength requirements.
-        confirmContainer.style.display = strongPasswordRegex.test(password) ? "flex" : "none";
-    }
-
-    /**
-     * Validates all form fields and enables/disables the register button accordingly.
-     */
-    function validateForm() {
-        const username = document.getElementById("username").value;
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
-        const confirmPassword = document.getElementById("confirm_password").value;
-        const role = document.getElementById("role").value;
-        const terms = document.getElementById("terms").checked;
-        const registerButton = document.getElementById("registerButton");
-
-        // Regular expression for email validation.
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        // Regular expression for strong password validation.
-        const strongPasswordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
-
-        // Check if all required fields are filled and meet validation criteria.
-        const isFormValid = username.trim() !== "" &&
-                            emailRegex.test(email) &&
-                            strongPasswordRegex.test(password) &&
-                            password === confirmPassword &&
-                            role !== "" &&
-                            terms;
-
-        // Enable or disable the register button based on form validity.
-        registerButton.disabled = !isFormValid;
-    }
-
-    /**
-     * Opens the terms and conditions modal.
-     */
+    // Function to open the Terms and Conditions/Privacy Policy modal
     function openTermsModal() {
-        document.getElementById("termsModal").style.display = "block";
+        document.getElementById('termsModal').style.display = 'flex'; // Use flex to center
     }
 
-    /**
-     * Closes the terms and conditions modal.
-     */
+    // Function to close the Terms and Conditions/Privacy Policy modal
     function closeTermsModal() {
-        document.getElementById("termsModal").style.display = "none";
+        document.getElementById('termsModal').style.display = 'none';
     }
 
-    // Initial form validation when the page loads.
-    document.addEventListener('DOMContentLoaded', () => {
-        handlePasswordInput(); // Ensure confirm password visibility is correctly set on load.
-        validateForm(); // Set initial state of the register button.
-    });
-</script>
+    // Function to handle password input (you can add strength meter logic here if needed)
+    function handlePasswordInput() {
+        // This function can be used for real-time password strength feedback if you implement it.
+        // For now, it mainly triggers validateForm().
+        validateForm(); // Ensure validateForm is called to update button state
+    }
 
+    // --- UPDATED VALIDATE FORM FUNCTION ---
+    function validateForm() {
+        const username = document.getElementById('username').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm_password').value;
+        const phone = document.getElementById('phone').value.trim(); // Get phone number value
+        const role = document.getElementById('role').value;
+        const termsAccepted = document.getElementById('terms').checked;
+        const registerButton = document.getElementById('registerButton');
+
+        // Basic validation checks
+        const isUsernameValid = username !== '';
+        const isEmailValid = email !== '' && email.includes('@'); // Basic email format check
+        const isPasswordStrong = password.length >= 8 &&
+                                /[A-Z]/.test(password) &&
+                                /[0-9]/.test(password) &&
+                                /[^a-zA-Z0-9]/.test(password); // Requires special char
+        const doPasswordsMatch = password === confirmPassword && password !== '';
+        const isPhoneValid = phone !== ''; // Check if phone is not empty
+        const isRoleSelected = role !== ''; // Checks if a role other than the default empty one is selected
+
+        // Enable button only if all conditions are met
+        if (isUsernameValid && isEmailValid && isPasswordStrong && doPasswordsMatch && isPhoneValid && isRoleSelected && termsAccepted) {
+            registerButton.disabled = false;
+        } else {
+            registerButton.disabled = true;
+        }
+    }
+
+    // Call validateForm on page load to set initial button state
+    document.addEventListener('DOMContentLoaded', validateForm);
+
+    // Add event listeners for real-time validation on input
+    document.getElementById('username').addEventListener('input', validateForm);
+    document.getElementById('email').addEventListener('input', validateForm);
+    document.getElementById('password').addEventListener('input', validateForm);
+    document.getElementById('confirm_password').addEventListener('input', validateForm);
+    document.getElementById('phone').addEventListener('input', validateForm); // Add listener for phone
+    document.getElementById('role').addEventListener('change', validateForm);
+    document.getElementById('terms').addEventListener('change', validateForm);
+
+</script>
 </body>
 </html>
