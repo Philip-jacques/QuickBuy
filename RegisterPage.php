@@ -12,6 +12,7 @@ $errorMessage = "";
 // Check if the form has been submitted using the POST method.
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
+    // Include your database connection file
     include 'db.php';
 
     // Sanitize and retrieve form data from the POST request.
@@ -58,19 +59,42 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Bind parameters to the prepared statement. 'sssss' indicates five string parameters.
             $stmt->bind_param("sssss", $username, $email, $hashedPassword, $role, $phone);
 
-            // Execute the prepared statement.
-            if ($stmt->execute()) {
-                // Set success message if registration is successful.
-                $successMessage = "🎉 Registration successful. <a href='LoginPage.php'>Login here</a>.";
-            } else {
-                // Check for duplicate entry error (e.g., unique email or username constraint).
-                if ($conn->errno == 1062) { // MySQL error code for duplicate entry.
-                    $errorMessage = "Error: An account with this email or username already exists. Please try another.";
+            // --- START MODIFIED CODE BLOCK FOR ERROR HANDLING ---
+            try {
+                if ($stmt->execute()) {
+                    // Set success message if registration is successful.
+                    $successMessage = "🎉 Registration successful. <a href='LoginPage.php'>Login here</a>.";
                 } else {
-                    // Set a generic error message if another database error occurs.
-                    $errorMessage = "Error: " . $stmt->error;
+                    // This 'else' block would typically be for non-exception errors,
+                    // but with mysqli in error mode, most errors throw exceptions.
+                    // Keep it for robustness, though it might not be hit often.
+                    $errorMessage = "An unexpected error occurred during registration. Please try again.";
+                }
+            } catch (mysqli_sql_exception $e) {
+                // Check if the error code indicates a duplicate entry
+                if ($e->getCode() == 1062) {
+                    // Check if the error message specifically mentions 'email'
+                    if (strpos($e->getMessage(), 'email') !== false) {
+                        $errorMessage = "Sorry, that **email address is already in use**. Please log in or use a different email.";
+                    }
+                    // Check if the error message specifically mentions 'phone'
+                    // This assumes you've added a UNIQUE constraint to the 'phone' column
+                    elseif (strpos($e->getMessage(), 'phone') !== false) {
+                        $errorMessage = "Sorry, that **phone number is already registered**. Please use a different phone number.";
+                    }
+                    // If neither 'email' nor 'phone' is explicitly mentioned but it's a duplicate entry
+                    else {
+                        $errorMessage = "Sorry, your registration could not be completed as **some of the information provided is already in use**.";
+                    }
+                } else {
+                    // Handle other SQL exceptions (e.g., connection issues, syntax errors)
+                    // For production, you might log the specific error ($e->getMessage())
+                    // but show a generic message to the user for security.
+                    $errorMessage = "An unexpected database error occurred. Please try again later.";
                 }
             }
+            // --- END MODIFIED CODE BLOCK FOR ERROR HANDLING ---
+
             // Close the prepared statement.
             $stmt->close();
         }
@@ -149,12 +173,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             overflow-y: auto;
             box-sizing: border-box;
         }
-html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    box-sizing: border-box;
-}
 
         @keyframes bgShift {
             0% { background-position: 0% 50%; }
@@ -906,86 +924,105 @@ html, body {
             <ul>
                 <li>Once an order is placed and confirmed, it is considered final.</li>
                 <li><strong>Buyers are solely responsible for ensuring that they have selected the correct items they wish to purchase before completing their order.</strong> We strongly advise you to carefully review your cart contents, quantities, and selected variations before proceeding to checkout.</li>
-                <li><strong>All sales are final, and we do not offer refunds or exchanges on items once an order has been placed.</strong> This policy is in place to ensure efficient processing and to reflect the nature of our marketplace.</li>
+                <li><strong>All sales are final, and we do not offer refunds or exchanges on items once an order has been 
             </ul>
         </div>
+        <button type="button" onclick="closeTermsModal()">Close</button>
     </div>
 </div>
 
 <script>
-    // Function to toggle password visibility
+    document.addEventListener('DOMContentLoaded', function() {
+        validateForm(); // Initial validation on page load
+    });
+
     function togglePassword(id) {
         const input = document.getElementById(id);
-        const icon = input.nextElementSibling; // Get the next sibling (the eye icon)
-
         if (input.type === "password") {
             input.type = "text";
-            icon.textContent = '🙈'; // Change to a "hide" icon
         } else {
             input.type = "password";
-            icon.textContent = '👁️'; // Change to a "show" icon
         }
     }
 
-    // Function to open the Terms and Conditions/Privacy Policy modal
-    function openTermsModal() {
-        document.getElementById('termsModal').style.display = 'flex'; // Use flex to center
-    }
-
-    // Function to close the Terms and Conditions/Privacy Policy modal
-    function closeTermsModal() {
-        document.getElementById('termsModal').style.display = 'none';
-    }
-
-    // Function to handle password input (you can add strength meter logic here if needed)
-    function handlePasswordInput() {
-        // This function can be used for real-time password strength feedback if you implement it.
-        // For now, it mainly triggers validateForm().
-        validateForm(); // Ensure validateForm is called to update button state
-    }
-
-    // --- UPDATED VALIDATE FORM FUNCTION ---
     function validateForm() {
         const username = document.getElementById('username').value.trim();
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirm_password').value;
-        const phone = document.getElementById('phone').value.trim(); // Get phone number value
+        const phone = document.getElementById('phone').value.trim();
         const role = document.getElementById('role').value;
-        const termsAccepted = document.getElementById('terms').checked;
+        const terms = document.getElementById('terms').checked;
         const registerButton = document.getElementById('registerButton');
 
-        // Basic validation checks
-        const isUsernameValid = username !== '';
-        const isEmailValid = email !== '' && email.includes('@'); // Basic email format check
-        const isPasswordStrong = password.length >= 8 &&
-                                /[A-Z]/.test(password) &&
-                                /[0-9]/.test(password) &&
-                                /[^a-zA-Z0-9]/.test(password); // Requires special char
-        const doPasswordsMatch = password === confirmPassword && password !== '';
-        const isPhoneValid = phone !== ''; // Check if phone is not empty
-        const isRoleSelected = role !== ''; // Checks if a role other than the default empty one is selected
+        let isValid = true;
 
-        // Enable button only if all conditions are met
-        if (isUsernameValid && isEmailValid && isPasswordStrong && doPasswordsMatch && isPhoneValid && isRoleSelected && termsAccepted) {
-            registerButton.disabled = false;
-        } else {
-            registerButton.disabled = true;
+        // Check if all fields are filled
+        if (username === '' || email === '' || password === '' || confirmPassword === '' || phone === '' || role === '') {
+            isValid = false;
         }
+
+        // Validate email format (basic check)
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            isValid = false;
+        }
+
+        // Validate passwords match
+        if (password !== confirmPassword) {
+            isValid = false;
+        }
+
+        // Validate password strength
+        const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,}$/;
+        if (!passwordRegex.test(password)) {
+            isValid = false;
+        }
+
+        // Validate terms and conditions
+        if (!terms) {
+            isValid = false;
+        }
+
+        registerButton.disabled = !isValid;
     }
 
-    // Call validateForm on page load to set initial button state
-    document.addEventListener('DOMContentLoaded', validateForm);
+    function handlePasswordInput() {
+        const passwordField = document.getElementById('password');
+        const confirmContainer = document.getElementById('confirmContainer');
 
-    // Add event listeners for real-time validation on input
-    document.getElementById('username').addEventListener('input', validateForm);
-    document.getElementById('email').addEventListener('input', validateForm);
-    document.getElementById('password').addEventListener('input', validateForm);
-    document.getElementById('confirm_password').addEventListener('input', validateForm);
-    document.getElementById('phone').addEventListener('input', validateForm); // Add listener for phone
-    document.getElementById('role').addEventListener('change', validateForm);
-    document.getElementById('terms').addEventListener('change', validateForm);
+        // Show confirm password field once user starts typing in password
+        if (passwordField.value.length > 0) {
+            confirmContainer.classList.remove('hidden');
+        } else {
+            // Optional: Hide if password field becomes empty.
+            // If confirm password is always required, remove this else block.
+            confirmContainer.classList.add('hidden');
+        }
+        validateForm(); // Re-validate after password input changes
+    }
 
+    // Call handlePasswordInput on load to correctly set visibility if there's pre-filled data
+    document.addEventListener('DOMContentLoaded', handlePasswordInput);
+
+
+    // Modal functions
+    function openTermsModal() {
+        const modal = document.getElementById('termsModal');
+        modal.style.display = 'block';
+    }
+
+    function closeTermsModal() {
+        const modal = document.getElementById('termsModal');
+        modal.style.display = 'none';
+    }
+
+    // Close the modal if the user clicks anywhere outside of the modal content
+    window.onclick = function(event) {
+        const modal = document.getElementById('termsModal');
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
 </script>
 </body>
 </html>
