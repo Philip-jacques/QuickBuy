@@ -12,7 +12,7 @@ $errorMessage = "";
 // Check if the form has been submitted using the POST method.
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    // Include your database connection file
+    // Include database connection file
     include 'db.php';
 
     // Sanitize and retrieve form data from the POST request.
