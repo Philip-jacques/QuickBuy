@@ -35,7 +35,6 @@ $payment_id = $_GET['payment_id'];
  * and order_id from the 'payments' table based on the provided payment ID.
  * Includes robust error handling for statement preparation and execution.
  */
-// MODIFIED LINE: Added 'order_id' to the SELECT statement
 $stmt = $conn->prepare("SELECT total_amount, courier_cost, order_id FROM payments WHERE id = ?");
 
 // Check if the statement preparation was successful.
@@ -78,14 +77,6 @@ $conn->close();
 
 // Calculate the subtotal.
 $subtotal = $total_amount - $courier_cost;
-
-// IMPORTANT: Remove or comment out these display_errors lines after debugging!
-// ini_set('display_errors', 1);
-// ini_set('display_startup_errors', 1);
-// error_reporting(E_ALL);
-
-// Continue with your HTML structure here, likely displaying the payment details
-// using $total_amount, $courier_cost, $subtotal
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -141,15 +132,15 @@ $subtotal = $total_amount - $courier_cost;
             --container-border: rgba(255, 255, 255, 0.3); /* More visible border */
             --text-color: var(--ghost-white);
             --heading-color: var(--white-pop);
-            --strong-color: var(--light-font); /* Changed: Amounts/IDs are now light-font */
-            --link-color: var(--cool-gray); /* Changed: Links are now a cooler gray */
-            --link-hover-color: var(--slate-gray); /* Changed: Link hover is a slightly darker gray */
+            --strong-color: var(--light-font); /* Amounts/IDs are now light-font */
+            --link-color: var(--cool-gray); /* Links are now a cooler gray */
+            --link-hover-color: var(--slate-gray); /* Link hover is a slightly darker gray */
             --button-bg: var(--caribbean-current);
             --button-hover: var(--midnight-green);
             --next-steps-bg: rgba(0, 0, 0, 0.25);
-            --next-steps-border: var(--sapphire); /* Changed: Next steps border is now sapphire blue */
-            --next-steps-heading: var(--sapphire); /* Changed: Next steps heading is now sapphire blue */
-            --icon-color: var(--true-blue); /* New variable for icon color */
+            --next-steps-border: var(--sapphire); /* Next steps border is now sapphire blue */
+            --next-steps-heading: var(--sapphire); /*  Next steps heading is now sapphire blue */
+            --icon-color: var(--true-blue); /* variable for icon color */
         }
 
         /* Universal Box-Sizing */
