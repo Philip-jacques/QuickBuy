@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $sellerId = $_SESSION['user_id'];
 
     // 2. Input Sanitization and Validation
-    // Use filter_input for better security and type casting
+    // Used filter_input for better security and type casting
     $itemName = filter_input(INPUT_POST, 'itemName', FILTER_SANITIZE_STRING);
     $itemDescription = filter_input(INPUT_POST, 'itemDescription', FILTER_SANITIZE_STRING);
     $altText = filter_input(INPUT_POST, 'altText', FILTER_SANITIZE_STRING);
@@ -111,10 +111,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
-    // Use correct binding types: s=string, d=double, i=integer
-    // IMPORTANT: Add 's' for the new 'status' parameter
+    // Used binding types: s=string, d=double, i=integer
+    
     $stmt->bind_param(
-        "ssssssdiiss", // 's' added at the end for 'status'
+        "ssssssdiiss", 
         $itemName,
         $itemDescription,
         $altText,
