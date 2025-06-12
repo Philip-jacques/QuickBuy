@@ -26,7 +26,7 @@ if ($stmt->execute()) {
     $orderId = $stmt->insert_id; // Retrieves the ID of the newly inserted order.
 
     // Deletes all items from the buyer's cart after the order has been successfully placed.
-    // Note: This is an un-prepared statement and could be a SQL injection vulnerability if $buyerId is not strictly controlled.
+    
     $conn->query("DELETE FROM cart WHERE buyer_id = $buyerId");
 
     // Redirects to a payment success page, passing the new order ID as a URL parameter.
