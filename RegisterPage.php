@@ -18,7 +18,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Sanitize and retrieve form data from the POST request.
     $username = htmlspecialchars($_POST["username"]);
     $email = htmlspecialchars($_POST["email"]);
-    $password = $_POST["password"]; // Password will be hashed, so no htmlspecialchars here yet.
+    $password = $_POST["password"]; // Password will be hashed
     $confirmPassword = $_POST["confirm_password"];
     $role = htmlspecialchars($_POST["role"]);
     // Check if the terms checkbox was checked.
@@ -59,7 +59,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Bind parameters to the prepared statement. 'sssss' indicates five string parameters.
             $stmt->bind_param("sssss", $username, $email, $hashedPassword, $role, $phone);
 
-            // --- START MODIFIED CODE BLOCK FOR ERROR HANDLING ---
+            
             try {
                 if ($stmt->execute()) {
                     // Set success message if registration is successful.
@@ -93,7 +93,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $errorMessage = "An unexpected database error occurred. Please try again later.";
                 }
             }
-            // --- END MODIFIED CODE BLOCK FOR ERROR HANDLING ---
+            
 
             // Close the prepared statement.
             $stmt->close();
