@@ -1,14 +1,12 @@
 <?php
 // PHP Configuration for Error Reporting:
-// Enable error display for development. In a production environment, set 'display_errors' to 0
-// and log errors to a file for security and to prevent revealing sensitive information.
+
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 // Session Management:
-// Start the PHP session. This must be the very first thing executed in your script
-// to ensure session variables are available and properly managed.
+
 session_start();
 
 // Database Connection:
@@ -41,7 +39,7 @@ if (isset($_GET['msg'])) {
         case 'logged_out':
             $message = "You have been successfully logged out.";
             break;
-        // Add more cases for other messages if needed, adhering to a consistent messaging strategy.
+        
     }
     // If a message was set by the switch, assign it to the $error variable for display.
     if ($message) {
@@ -651,7 +649,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // Function to redirect the user to the main index page.
         function exitWebsite() {
-            window.location.href = 'index.html'; // Redirect to your homepage
+            window.location.href = 'index.html'; // Redirect to homepage
         }
     </script>
 
