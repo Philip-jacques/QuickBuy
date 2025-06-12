@@ -36,8 +36,8 @@ $sortToggle = $sortOrder === 'DESC' ? 'asc' : 'desc';
 // --- SQL Query to Fetch Order Data ---
 // This query retrieves comprehensive information about orders and their corresponding items.
 // It uses LEFT JOIN to ensure that orders are still displayed even if there are issues
-// with associated order items, products, or sellers (though in a well-normalized database,
-// this scenario should ideally not result in NULLs for critical fields like product_name).
+// with associated order items, products, or sellers.
+
 $sql = "SELECT
             o.id AS order_id,            -- Order ID
             o.order_date,                -- Date of the order
