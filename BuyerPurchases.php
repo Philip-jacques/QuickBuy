@@ -561,9 +561,7 @@ if ($stmt) {
         <?php endif; ?>
 
         <?php
-        // --- Close Database Resources ---
-        // It's good practice to close the statement and connection as soon as they are no longer needed
-        // to free up resources.
+
         $stmt->close();
         $conn->close();
         ?>
