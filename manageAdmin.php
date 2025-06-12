@@ -196,9 +196,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['edit_id'])) {
                 // If a superadmin already exists, only another superadmin can elevate.
                 if ($existingSuperadminCount > 0) {
                     $message = "Error: Only existing superadmins can elevate accounts to superadmin rank if one already exists.";
-                }
-                // Note: The case where a 'normal' admin creates the *very first* superadmin
-                // (if no superadmin exists yet) might need specific handling or be done via initial setup scripts.
+                }                
             }
         } else {
             $message = "Error: Admin not found for editing.";
@@ -248,7 +246,7 @@ $results = $admins->get_result();
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* --- CSS Styling (Provided in original code, no changes needed for comments) --- */
+        /* --- CSS Styling  --- */
         /* Reused Color Palette and General Styles from view_website_feedback.php */
         :root {
             --true-blue: #0466c8ff;
