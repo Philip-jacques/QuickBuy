@@ -18,7 +18,7 @@ unset($_SESSION['stock_error']); // Clear the stock error message from the sessi
 if (isset($_GET['search'])) {
     $search = $_GET['search']; // Get the search term
     // Prepare a SQL statement to select products where the itemName matches the search term
-    // MODIFIED: Added `AND status = 'approved'` to only show approved products
+    
     $stmt = $conn->prepare("SELECT * FROM products WHERE itemName LIKE ? AND status = 'approved'");
     $searchParam = "%" . $search . "%"; // Add wildcards for partial matching
     $stmt->bind_param("s", $searchParam); // Bind the search parameter as a string
@@ -36,7 +36,7 @@ if (isset($_GET['search'])) {
     $categoryTitle = "Items in \"" . htmlspecialchars($category) . "\""; // Set the page title for category items
 } else {
     // If no category or search term is provided, show all approved items
-    // MODIFIED: Added `WHERE status = 'approved'` to ensure only approved products are displayed
+    
     $stmt = $conn->prepare("SELECT * FROM products WHERE status = 'approved'");
     $stmt->execute(); // Execute the prepared statement
     $result = $stmt->get_result(); // Get the result set
