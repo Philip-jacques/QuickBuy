@@ -1,19 +1,4 @@
 <?php
-/**
- * @file manageUsers.php
- * This script provides an administrative interface for managing user accounts,
- * including updating user details and deleting users. It incorporates search
- * and filter functionalities for user listings.
- *
- * This file is part of the QuickBuy Admin Panel.
- *
- * @category Admin
- * @package  UserManagement
- * @author   Your Name <your.email@example.com>
- * @license  http://opensource.org/licenses/MIT MIT License
- * @link     http://www.yourwebsite.com/admin/manageUsers.php
- */
-
 // Start a new session or resume the existing one.
 session_start();
 
