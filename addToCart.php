@@ -6,7 +6,7 @@ session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Include the database connection file. Ensure this file correctly establishes a connection to your database ($conn).
+// Include the database connection file.
 require 'db.php'; 
 
 // Set the HTTP header to indicate that the response will be in JSON format.
