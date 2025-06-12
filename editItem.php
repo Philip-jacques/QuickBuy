@@ -144,8 +144,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
 
         // Allow certain file formats for security and consistency.
         $allowTypes = array('jpg', 'png', 'jpeg', 'gif');
-        if (in_array(strtolower($fileType), $allowTypes)) {
-            // Optional: Check file size. Example: if ($_FILES['item_picture']['size'] > 2 * 1024 * 1024) { ... }
+        if (in_array(strtolower($fileType), $allowTypes)) {            
 
             // Upload file to server.
             if (move_uploaded_file($_FILES['item_picture']['tmp_name'], $targetFilePath)) {
@@ -153,8 +152,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
 
                 // Optionally, delete the old image file if it exists and is not a default placeholder.
                 if (!empty($current_picture) && file_exists($current_picture)) {
-                    // Add more robust checks if you have default images or system-managed images.
-                    // Example: don't delete files starting with 'default_'.
+                    
                     if (strpos($current_picture, 'default_') === false) {
                         unlink($current_picture); // Delete the old image file.
                     }
