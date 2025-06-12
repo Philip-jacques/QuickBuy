@@ -14,13 +14,13 @@ if (!isset($_SESSION['buyer_id'])) {
 $buyerId = $_SESSION['buyer_id'];
 $message = '';
 
-// --- NEW CANCELLATION LOGIC ---
+// ---CANCELLATION LOGIC ---
 if (isset($_GET['action']) && $_GET['action'] === 'cancel_payment') {
     $paymentIdToCancel = $_GET['payment_id'] ?? null;
 
     if ($paymentIdToCancel) {
         try {
-            // Start a transaction for atomicity (optional but good practice for multiple updates)
+            // Start a transaction for atomicity (Good for multiple updates)
             $conn->begin_transaction();
 
             // 1. Update the 'payments' table
@@ -80,10 +80,9 @@ if (isset($_GET['action']) && $_GET['action'] === 'cancel_payment') {
         } catch (mysqli_sql_exception $e) { // Use mysqli_sql_exception for MySQLi errors
             $conn->rollback(); // Rollback on error
             error_log("Payment cancellation DB error: " . $e->getMessage()); // This goes to the inaccessible server log
-            // --- ADD THIS LINE TO SEE THE ERROR ON SCREEN ---
+            
             $message = "<span style='color: red; font-weight: bold;'>❌ An error occurred during cancellation: " . htmlspecialchars($e->getMessage()) . ". Please try again or contact support.</span>";
-            // --- END OF ADDITION ---
-            // In a real application, you might redirect to a generic error page instead of staying here
+                  
         }
     } else {
         $message = "<span style='color: red; font-weight: bold;'>❌ Invalid payment ID for cancellation.</span>";
@@ -91,7 +90,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'cancel_payment') {
 }
 // --- END NEW CANCELLATION LOGIC ---
 
-// --- EXISTING POP UPLOAD LOGIC (unchanged for successful upload) ---
+// --- POP UPLOAD LOGIC ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_FILES['pop_file']) && $_FILES['pop_file']['error'] === UPLOAD_ERR_OK) {
         $popFile = $_FILES['pop_file']['name'];
